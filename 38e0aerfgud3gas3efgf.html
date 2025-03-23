@@ -86,13 +86,13 @@
 			border: 2px solid #ddd;
 			border-radius: 8px;
 			padding: 15px;
-			width: 234px; /* Increased by 30% from 180px */
+			width: 211px; /* Reduced by 10% from 234px (rounded to nearest pixel) */
 			cursor: pointer;
 			transition: all 0.3s ease;
 			background-color: #f9f9f9;
 			display: flex;
 			flex-direction: column;
-			height: 160px; /* Fixed height for all boxes */
+			height: 144px; /* Reduced by 10% from 160px (rounded to nearest pixel) */
 		}
 		.bundle-box:hover {
 			border-color: #0077cc;
@@ -138,7 +138,7 @@
 </head>
 
 <body>
-	<h1 id="mainTitle">Upgrade 2 >> 3</h1>
+	<h1 id="mainTitle">Upgrade</h1>
 	<p id="mainSubtitle">Kies een reeds afgenomen pakket of stel zelf samen</p>
 
 	<div class="bundles-container">
@@ -407,7 +407,12 @@
 				
 				items.forEach(item => {
 					const li = document.createElement('li');
-					li.textContent = item;
+					if (typeof item === 'string' && item.includes('(')) {
+						// Insert a line break before an opening parenthesis
+						li.innerHTML = item.replace(/\(/g, '<br>(');
+					} else {
+						li.textContent = item;
+					}
 					itemsElement.appendChild(li);
 				});
 			}
