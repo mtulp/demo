@@ -97,6 +97,10 @@
 			border-color: #0077cc;
 			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 		}
+		.bundle-box.active {
+			border-color: #0077cc;
+			background-color: #f0f7ff;
+		}
 		.bundle-box h3 {
 			margin-top: 0;
 			margin-bottom: 10px;
@@ -245,9 +249,9 @@
 	</div>
 
 	<script>
-		let prices = {};
+		let prices = [];
 		let bundles = [];
-		let componentNames = {};
+		let componentNames = [];
 		let componentMap = {};
 
 		function xorDecrypt(encodedText, key) {
@@ -270,7 +274,41 @@
 		function processURLParameters() {
 			const urlParams = new URLSearchParams(window.location.search);
 			
-			if (urlParams.has('data') && urlParams.has('key')) {
+			// Check for direct parameters first (from the demo.html link)
+			if (urlParams.has('title')) {
+				try {
+					// Get direct parameters
+					const data = {
+						title: urlParams.get('title'),
+						subtitle: urlParams.get('subtitle'),
+						removeAdminCounts: urlParams.get('removeAdminCounts') === 'true',
+						enableCommunication: urlParams.get('enableCommunication') === 'true'
+					};
+					
+					// Parse JSON parameters
+					if (urlParams.has('ps')) {
+						data.ps = JSON.parse(decodeURIComponent(urlParams.get('ps')));
+					}
+					
+					if (urlParams.has('cn')) {
+						data.cn = JSON.parse(decodeURIComponent(urlParams.get('cn')));
+					}
+					
+					if (urlParams.has('bs')) {
+						data.bs = JSON.parse(decodeURIComponent(urlParams.get('bs')));
+					}
+					
+					if (urlParams.has('ui')) {
+						data.ui = JSON.parse(decodeURIComponent(urlParams.get('ui')));
+					}
+					
+					loadAppData(data);
+				} catch (e) {
+					console.error('Error processing direct parameters:', e);
+				}
+			}
+			// Check for encrypted data as fallback
+			else if (urlParams.has('data') && urlParams.has('key')) {
 				try {
 					const encryptedData = urlParams.get('data');
 					const key = urlParams.get('key');
@@ -315,14 +353,7 @@
 		}
 		
 		function setupPrices(pricesArray) {
-			const keys = ['a', 'b', 'c', 'd', 'e', 'f'];
-			prices = {};
-			
-			keys.forEach((key, index) => {
-				if (index < pricesArray.length) {
-					prices[key] = pricesArray[index];
-				}
-			});
+			prices = pricesArray;
 			
 			componentMap = {
 				0: 'a',
@@ -335,14 +366,7 @@
 		}
 		
 		function setupComponentNames(namesArray) {
-			const keys = ['a', 'b', 'c', 'd', 'e', 'f'];
-			componentNames = {};
-			
-			keys.forEach((key, index) => {
-				if (index < namesArray.length) {
-					componentNames[key] = namesArray[index];
-				}
-			});
+			componentNames = namesArray;
 		}
 		
 		function setupBundles(bundlesData) {
@@ -374,8 +398,8 @@
 				itemsElement.innerHTML = '';
 				
 				const items = data.i.map(item => {
-					if (typeof item === 'number' && componentNames[componentMap[item]]) {
-						return componentNames[componentMap[item]];
+					if (typeof item === 'number' && componentNames[item]) {
+						return componentNames[item];
 					}
 					return item;
 				});
@@ -412,6 +436,10 @@
 				document.querySelector('input[name="documenten"][value="adminbox"]').checked = true;
 			} else if (components.includes('e')) {
 				document.querySelector('input[name="documenten"][value="adminbox-scanuser"]').checked = true;
+			}
+
+			if (components.includes('f')) {
+				document.querySelector('input[name="ocr"]').checked = true;
 			}
 		}
 		
@@ -487,13 +515,16 @@
 
 			let subtotal = 0;
 			for (const component of selectedComponents) {
-				subtotal += prices[component];
+				const componentIndex = Object.keys(componentMap).find(key => componentMap[key] === component);
+				if (componentIndex !== undefined) {
+					subtotal += prices[componentIndex];
+				}
 			}
 
 			const discount = bundleMatch ? bundleMatch.discount : 0;
 			const bundleTotal = subtotal - discount;
 
-			const ocrCost = ocrChecked ? prices.f : 0;
+			const ocrCost = ocrChecked ? prices[5] : 0; // OCR is at index 5
 
 			const total = bundleTotal + ocrCost;
 
@@ -536,12 +567,13 @@
 
 				for (const component of components) {
 					const row = document.createElement('tr');
+					const componentIndex = Object.keys(componentMap).find(key => componentMap[key] === component);
 
 					const nameCell = document.createElement('td');
-					nameCell.textContent = componentNames[component];
+					nameCell.textContent = componentNames[componentIndex];
 
 					const priceCell = document.createElement('td');
-					priceCell.textContent = '€ ' + prices[component].toFixed(2).replace('.', ',');
+					priceCell.textContent = '€ ' + prices[componentIndex].toFixed(2).replace('.', ',');
 					priceCell.style.textAlign = 'right';
 
 					row.appendChild(nameCell);
@@ -587,7 +619,7 @@
 					const ocrRow = document.createElement('tr');
 
 					const ocrNameCell = document.createElement('td');
-					ocrNameCell.textContent = componentNames.f;
+					ocrNameCell.textContent = componentNames[5]; // OCR is at index 5
 
 					const ocrPriceCell = document.createElement('td');
 					ocrPriceCell.textContent = '€ ' + ocrCost.toFixed(2).replace('.', ',');
