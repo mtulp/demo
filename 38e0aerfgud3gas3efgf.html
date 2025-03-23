@@ -408,8 +408,11 @@
 				items.forEach(item => {
 					const li = document.createElement('li');
 					if (typeof item === 'string' && item.includes('(')) {
-						// Insert a line break after an opening parenthesis
-						li.innerHTML = item.replace(/\(/g, '(<br>');
+						// Make text between parentheses (including parentheses) italic
+						// and insert a line break after opening parenthesis
+						li.innerHTML = item.replace(/(\([^)]+\))/g, function(match) {
+							return '<i>' + match.replace(/\(/g, '(<br>') + '</i>';
+						});
 					} else {
 						li.textContent = item;
 					}
