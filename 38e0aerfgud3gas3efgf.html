@@ -625,8 +625,23 @@
 				});
 			}
 			
-			// Verwerk prijsinformatie
-			if (urlParams.has('prices')) {
+			// Verwerk gecomprimeerde prijsinformatie (ps)
+			if (urlParams.has('ps')) {
+				try {
+					const pricesArray = JSON.parse(decodeURIComponent(urlParams.get('ps')));
+					prices = {
+						financieel: pricesArray[0],
+						financieel_meekijken: pricesArray[1],
+						facturatie: pricesArray[2],
+						adminbox: pricesArray[3],
+						adminbox_scanuser: pricesArray[4],
+						ocr: pricesArray[5]
+					};
+				} catch (e) {
+					console.error('Fout bij het verwerken van prijsinformatie:', e);
+				}
+			} else if (urlParams.has('prices')) {
+				// Backwards compatibility voor oude params
 				try {
 					prices = JSON.parse(decodeURIComponent(urlParams.get('prices')));
 				} catch (e) {
@@ -634,17 +649,24 @@
 				}
 			}
 			
-			// Verwerk bundelsinformatie
-			if (urlParams.has('bundles')) {
+			// Verwerk gecomprimeerde componentnamen (cn)
+			let componentNamesArray = [];
+			if (urlParams.has('cn')) {
 				try {
-					bundles = JSON.parse(decodeURIComponent(urlParams.get('bundles')));
+					componentNamesArray = JSON.parse(decodeURIComponent(urlParams.get('cn')));
+					componentNames = {
+						financieel: componentNamesArray[0],
+						financieel_meekijken: componentNamesArray[1],
+						facturatie: componentNamesArray[2],
+						adminbox: componentNamesArray[3],
+						adminbox_scanuser: componentNamesArray[4],
+						ocr: componentNamesArray[5]
+					};
 				} catch (e) {
-					console.error('Fout bij het verwerken van bundelsinformatie:', e);
+					console.error('Fout bij het verwerken van componentnamen:', e);
 				}
-			}
-			
-			// Verwerk componentnamen
-			if (urlParams.has('componentNames')) {
+			} else if (urlParams.has('componentNames')) {
+				// Backwards compatibility voor oude params
 				try {
 					componentNames = JSON.parse(decodeURIComponent(urlParams.get('componentNames')));
 				} catch (e) {
@@ -652,8 +674,48 @@
 				}
 			}
 			
-			// Verwerk bundel UI informatie
-			if (urlParams.has('bundleUI')) {
+			// Verwerk gecomprimeerde bundelsinformatie (bs)
+			if (urlParams.has('bs')) {
+				try {
+					const bundlesShort = JSON.parse(decodeURIComponent(urlParams.get('bs')));
+					bundles = bundlesShort.map(b => {
+						const componentMap = {
+							0: "financieel",
+							1: "financieel_meekijken",
+							2: "facturatie",
+							3: "adminbox",
+							4: "adminbox_scanuser",
+							5: "ocr"
+						};
+						
+						return {
+							components: b.c.map(index => componentMap[index]),
+							discount: b.d,
+							code: b.n
+						};
+					});
+				} catch (e) {
+					console.error('Fout bij het verwerken van bundelsinformatie:', e);
+				}
+			} else if (urlParams.has('bundles')) {
+				// Backwards compatibility voor oude params
+				try {
+					bundles = JSON.parse(decodeURIComponent(urlParams.get('bundles')));
+				} catch (e) {
+					console.error('Fout bij het verwerken van bundelsinformatie:', e);
+				}
+			}
+			
+			// Verwerk gecomprimeerde bundel UI informatie (ui)
+			if (urlParams.has('ui')) {
+				try {
+					const bundleUIShort = JSON.parse(decodeURIComponent(urlParams.get('ui')));
+					updateBundleUI(bundleUIShort, componentNamesArray);
+				} catch (e) {
+					console.error('Fout bij het verwerken van bundle UI informatie:', e);
+				}
+			} else if (urlParams.has('bundleUI')) {
+				// Backwards compatibility voor oude params
 				try {
 					const bundleUIData = JSON.parse(decodeURIComponent(urlParams.get('bundleUI')));
 					updateBundleUI(bundleUIData);
@@ -663,8 +725,7 @@
 			}
 		}
 		
-		function updateBundleUI(bundleUIData) {
-			// Update bundleboxes met data uit URL parameters
+		function updateBundleUI(bundleUIData, componentNamesArray) {
 			document.querySelectorAll('.bundle-box').forEach((box, index) => {
 				if (bundleUIData[index]) {
 					const data = bundleUIData[index];
@@ -673,9 +734,13 @@
 					const count = box.querySelector('.bundle-count');
 					
 					// Update items
-					if (data.items && data.items.length > 0) {
+					if (data.i && data.i.length > 0) {
 						boxData.innerHTML = '';
-						data.items.forEach(item => {
+						const items = componentNamesArray ? 
+							data.i.map(item => typeof item === 'number' ? componentNamesArray[item] : item) :
+							data.i;
+							
+						items.forEach(item => {
 							const li = document.createElement('li');
 							li.textContent = item;
 							boxData.appendChild(li);
@@ -683,13 +748,13 @@
 					}
 					
 					// Update price
-					if (data.price) {
-						price.textContent = data.price;
+					if (data.p) {
+						price.textContent = data.p;
 					}
 					
 					// Update count
-					if (data.count) {
-						count.textContent = data.count;
+					if (data.c) {
+						count.textContent = "Administraties: " + data.c;
 					}
 				}
 			});
