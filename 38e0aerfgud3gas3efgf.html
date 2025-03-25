@@ -86,13 +86,13 @@
 			border: 2px solid #ddd;
 			border-radius: 8px;
 			padding: 15px;
-			width: 211px; /* Reduced by 10% from 234px (rounded to nearest pixel) */
+			width: 211px;
 			cursor: pointer;
 			transition: all 0.3s ease;
 			background-color: #f9f9f9;
 			display: flex;
 			flex-direction: column;
-			height: 144px; /* Reduced by 10% from 160px (rounded to nearest pixel) */
+			height: 144px;
 		}
 		.bundle-box:hover {
 			border-color: #0077cc;
@@ -357,12 +357,12 @@
 			prices = pricesArray;
 			
 			componentMap = {
-				0: 'a',
-				1: 'b',
-				2: 'c',
-				3: 'd',
-				4: 'e',
-				5: 'f'
+				0: 'a', // Financieel
+				1: 'b', // AdmInbox
+				2: 'c', // AdmInbox Scanuser
+				3: 'd', // Facturatie
+				4: 'e', // Financieel Meekijken
+				5: 'f'  // Onbeperkt OCR
 			};
 		}
 		
@@ -423,24 +423,26 @@
 		}
 		
 		function fillForm(components) {
+			// Reset form
 			document.querySelector('input[name="boekhouding"][value="geen"]').checked = true;
 			document.querySelector('input[name="facturatie"]').checked = false;
 			document.querySelector('input[name="documenten"][value="nvt"]').checked = true;
 			document.querySelector('input[name="ocr"]').checked = false;
 
+			// Set appropriate values based on components
 			if (components.includes('a')) {
 				document.querySelector('input[name="boekhouding"][value="financieel"]').checked = true;
-			} else if (components.includes('b')) {
+			} else if (components.includes('e')) {
 				document.querySelector('input[name="boekhouding"][value="financieel-meekijken"]').checked = true;
 			}
 
-			if (components.includes('c')) {
+			if (components.includes('d')) {
 				document.querySelector('input[name="facturatie"]').checked = true;
 			}
 
-			if (components.includes('d')) {
+			if (components.includes('b')) {
 				document.querySelector('input[name="documenten"][value="adminbox"]').checked = true;
-			} else if (components.includes('e')) {
+			} else if (components.includes('c')) {
 				document.querySelector('input[name="documenten"][value="adminbox-scanuser"]').checked = true;
 			}
 
@@ -467,20 +469,23 @@
 
 			const selectedComponents = [];
 
+			// Boekhouding
 			if (boekhouding === 'financieel') {
-				selectedComponents.push('a');
+				selectedComponents.push('a');  // Financieel
 			} else if (boekhouding === 'financieel-meekijken') {
-				selectedComponents.push('b');
+				selectedComponents.push('e');  // Financieel Meekijken
 			}
 
+			// Facturatie
 			if (facturatie) {
-				selectedComponents.push('c');
+				selectedComponents.push('d');  // Facturatie
 			}
 
+			// Documenten
 			if (documenten === 'adminbox') {
-				selectedComponents.push('d');
+				selectedComponents.push('b');  // AdminBox
 			} else if (documenten === 'adminbox-scanuser') {
-				selectedComponents.push('e');
+				selectedComponents.push('c');  // AdminBox Scanuser
 			}
 
 			return {
@@ -494,12 +499,14 @@
 				const sortedComponents = [...components].sort();
 				const selectedStr = JSON.stringify(sortedComponents);
 
-				if (JSON.stringify(['a', 'c', 'd'].sort()) === selectedStr) {
-					highlightActiveBundle('bundle1');
-				} else if (JSON.stringify(['b', 'd'].sort()) === selectedStr) {
-					highlightActiveBundle('bundle2');
-				} else if (JSON.stringify(['a', 'c'].sort()) === selectedStr) {
-					highlightActiveBundle('bundle3');
+				// Match the components to the appropriate bundle
+				if (JSON.stringify(['a', 'b'].sort()) === selectedStr) {
+					highlightActiveBundle('bundle1');  // Financieel - AdminBox
+				} else if (JSON.stringify(['a', 'd'].sort()) === selectedStr) {
+					highlightActiveBundle('bundle2');  // Financieel - Facturatie
+				} else if (JSON.stringify(['a', 'b', 'd'].sort()) === selectedStr || 
+						   JSON.stringify(['a', 'd', 'b'].sort()) === selectedStr) {
+					highlightActiveBundle('bundle3');  // Financieel - Facturatie - AdminBox
 				} else {
 					highlightActiveBundle('customBundle');
 				}
@@ -508,8 +515,11 @@
 		
 		function calculatePrices() {
 			const { selectedComponents, ocrChecked } = getSelectedComponents();
+			
+			// Sort components for consistent comparison
 			const sortedComponents = [...selectedComponents].sort();
 
+			// Find matching bundle
 			let bundleMatch = null;
 			for (const bundle of bundles) {
 				const sortedBundleComponents = [...bundle.components].sort();
@@ -519,6 +529,7 @@
 				}
 			}
 
+			// Calculate sum of individual component prices
 			let subtotal = 0;
 			for (const component of selectedComponents) {
 				const componentIndex = Object.keys(componentMap).find(key => componentMap[key] === component);
@@ -527,38 +538,44 @@
 				}
 			}
 
+			// Apply bundle discount if applicable
 			const discount = bundleMatch ? bundleMatch.discount : 0;
 			const bundleTotal = subtotal - discount;
 
+			// Add OCR if selected
 			const ocrCost = ocrChecked ? prices[5] : 0; // OCR is at index 5
 
+			// Calculate final total
 			const total = bundleTotal + ocrCost;
 
+			// Display the results
 			displayResults(selectedComponents, subtotal, discount, bundleTotal, ocrChecked, ocrCost, total, bundleMatch);
 
+			// Update bundle highlighting
 			updateBundleHighlighting(selectedComponents);
 			
+			// Send data to parent if in iframe
 			sendDataToParent(selectedComponents, total, bundleMatch);
 		}
-        
-        function sendDataToParent(components, total, bundle) {
-            if (window.parent && window.parent !== window) {
-                const selectedData = {
-                    components: components,
-                    total: total,
-                    bundleCode: bundle ? bundle.code : null
-                };
-                
-                try {
-                    window.parent.postMessage({
-                        type: 'selection',
-                        data: selectedData
-                    }, '*');
-                } catch (e) {
-                    console.error('Fout bij verzenden data naar parent:', e);
-                }
-            }
-        }
+		
+		function sendDataToParent(components, total, bundle) {
+			if (window.parent && window.parent !== window) {
+				const selectedData = {
+					components: components,
+					total: total,
+					bundleCode: bundle ? bundle.code : null
+				};
+				
+				try {
+					window.parent.postMessage({
+						type: 'selection',
+						data: selectedData
+					}, '*');
+				} catch (e) {
+					console.error('Fout bij verzenden data naar parent:', e);
+				}
+			}
+		}
 
 		function displayResults(components, subtotal, discount, bundleTotal, ocrChecked, ocrCost, total, bundle) {
 			const resultSection = document.getElementById('resultSection');
@@ -571,6 +588,7 @@
 			if ((components.length > 0 || ocrChecked) && total > 0) {
 				resultSection.style.display = 'block';
 
+				// Add individual components to table
 				for (const component of components) {
 					const row = document.createElement('tr');
 					const componentIndex = Object.keys(componentMap).find(key => componentMap[key] === component);
@@ -588,6 +606,7 @@
 					resultTableBody.appendChild(row);
 				}
 
+				// Add bundle discount if applicable
 				if (discount > 0) {
 					const discountRow = document.createElement('tr');
 
@@ -604,7 +623,8 @@
 					resultTableBody.appendChild(discountRow);
 				}
 
-				if (bundleTotal !== total || ocrChecked) {
+				// Add subtotal row if needed (if there's OCR or a discount)
+				if (discount > 0 || ocrChecked) {
 					const bundleRow = document.createElement('tr');
 					bundleRow.className = 'subtotal';
 
@@ -621,6 +641,7 @@
 					resultTableBody.appendChild(bundleRow);
 				}
 
+				// Add OCR if selected
 				if (ocrChecked) {
 					const ocrRow = document.createElement('tr');
 
@@ -637,6 +658,7 @@
 					resultTableBody.appendChild(ocrRow);
 				}
 
+				// Add total row
 				const totalRow = document.createElement('tr');
 				totalRow.className = 'totals';
 
@@ -652,6 +674,7 @@
 
 				resultTableBody.appendChild(totalRow);
 
+				// Show bundle code if applicable
 				if (bundle) {
 					bundleInfo.innerHTML = '<br><br>Bundle: ' + bundle.code;
 				}
@@ -661,28 +684,31 @@
 		}
 		
 		function initializeApp() {
+			// Bundle 1: Financieel - AdminBox (ADM FI)
 			document.getElementById('bundle1').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				highlightActiveBundle('bundle1');
-				fillForm(['a', 'c', 'd']);
+				fillForm(['a', 'b']); // Financieel + AdminBox
 				calculatePrices();
 			});
 
+			// Bundle 2: Financieel - Facturatie (FF)
 			document.getElementById('bundle2').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				highlightActiveBundle('bundle2');
-				fillForm(['b', 'd']);
+				fillForm(['a', 'd']); // Financieel + Facturatie
 				calculatePrices();
 			});
 
+			// Bundle 3: Financieel - Facturatie - AdminBox (ADM FI FA)
 			document.getElementById('bundle3').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				highlightActiveBundle('bundle3');
-				fillForm(['a', 'c']);
-				document.querySelector('input[name="ocr"]').checked = true;
+				fillForm(['a', 'd', 'b']); // Financieel + Facturatie + AdminBox
 				calculatePrices();
 			});
 
+			// Custom bundle
 			document.getElementById('customBundle').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				if (!document.getElementById('customBundle').classList.contains('active')) {
@@ -695,6 +721,7 @@
 				highlightActiveBundle('customBundle');
 			});
 
+			// Update prices when form elements change
 			document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
 				input.addEventListener('change', function () {
 					const activePackageSelected = document.querySelector('.bundle-box.active:not(#customBundle)');
@@ -705,6 +732,7 @@
 				});
 			});
 			
+			// Notify parent when loaded (if in iframe)
 			if (window.parent && window.parent !== window) {
 				window.parent.postMessage({
 					type: 'loaded'
