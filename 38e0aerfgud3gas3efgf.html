@@ -500,13 +500,13 @@
 				const selectedStr = JSON.stringify(sortedComponents);
 
 				// Match the components to the appropriate bundle
-				if (JSON.stringify(['a', 'b'].sort()) === selectedStr) {
-					highlightActiveBundle('bundle1');  // Financieel - AdminBox
-				} else if (JSON.stringify(['a', 'd'].sort()) === selectedStr) {
-					highlightActiveBundle('bundle2');  // Financieel - Facturatie
-				} else if (JSON.stringify(['a', 'b', 'd'].sort()) === selectedStr || 
-						   JSON.stringify(['a', 'd', 'b'].sort()) === selectedStr) {
-					highlightActiveBundle('bundle3');  // Financieel - Facturatie - AdminBox
+				// GEWIJZIGD: Bijgewerkt voor de nieuwe bundels
+				if (JSON.stringify(['e', 'd', 'b'].sort()) === selectedStr) {
+					highlightActiveBundle('bundle1');  // Financieel Meekijken - Facturatie - AdminBox
+				} else if (JSON.stringify(['a', 'd', 'b'].sort()) === selectedStr) {
+					highlightActiveBundle('bundle2');  // Financieel - Facturatie - AdminBox
+				} else if (JSON.stringify(['d', 'b'].sort()) === selectedStr) {
+					highlightActiveBundle('bundle3');  // Facturatie - AdminBox
 				} else {
 					highlightActiveBundle('customBundle');
 				}
@@ -684,27 +684,27 @@
 		}
 		
 		function initializeApp() {
-			// Bundle 1: Financieel - AdminBox (ADM FI)
+			// GEWIJZIGD: Bundel 1 - Financieel Meekijken - Facturatie - AdminBox (MK+_FACT_ADM)
 			document.getElementById('bundle1').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				highlightActiveBundle('bundle1');
-				fillForm(['a', 'b']); // Financieel + AdminBox
+				fillForm(['e', 'd', 'b']); // Financieel Meekijken + Facturatie + AdminBox
 				calculatePrices();
 			});
 
-			// Bundle 2: Financieel - Facturatie (FF)
+			// GEWIJZIGD: Bundel 2 - Financieel - Facturatie - AdminBox (ADM FI FA)
 			document.getElementById('bundle2').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				highlightActiveBundle('bundle2');
-				fillForm(['a', 'd']); // Financieel + Facturatie
+				fillForm(['a', 'd', 'b']); // Financieel + Facturatie + AdminBox
 				calculatePrices();
 			});
 
-			// Bundle 3: Financieel - Facturatie - AdminBox (ADM FI FA)
+			// GEWIJZIGD: Bundel 3 - Facturatie - AdminBox (ADM FA)
 			document.getElementById('bundle3').addEventListener('click', function () {
 				document.getElementById('ism3Form').style.display = 'block';
 				highlightActiveBundle('bundle3');
-				fillForm(['a', 'd', 'b']); // Financieel + Facturatie + AdminBox
+				fillForm(['d', 'b']); // Facturatie + AdminBox
 				calculatePrices();
 			});
 
