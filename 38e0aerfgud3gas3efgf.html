@@ -1,780 +1,586 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Upgrade</title>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.0/dist/themes/light.css">
-	<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.0/cdn/shoelace.js"></script>
-	<style>
-		body {
-			font-family: sans-serif;
-			max-width: 1200px;
-			margin: 0 auto;
-			padding: 20px;
-		}
-		h1 {
-			color: #333;
-			margin-bottom: 20px;
-		}
-		h2 {
-			color: #333;
-			margin-bottom: 5px;
-		}
-		p {
-			margin-top: 0;
-			margin-bottom: 15px;
-			color: #666;
-		}
-		.form-section {
-			margin-bottom: 25px;
-		}
-		.form-section h2 {
-			margin-bottom: 15px;
-			font-size: 1rem;
-			color: #444;
-		}
-		.form-section-header {
-			margin-bottom: 15px;
-			font-size: 1.2rem;
-			color: #444;
-		}
-		.option-group {
-			margin-bottom: 15px;
-		}
-		.option-group label {
-			display: block;
-			margin-bottom: 8px;
-		}
-		.result-table {
-			width: 60%;
-			border-collapse: collapse;
-			margin-top: 30px;
-		}
-		.result-table th,
-		.result-table td {
-			border: 1px solid #ddd;
-			padding: 8px;
-			text-align: left;
-		}
-		.result-table th {
-			background-color: #f2f2f2;
-		}
-		.result-section {
-			margin-top: 40px;
-			display: none;
-		}
-		.price {
-			text-align: right;
-		}
-		.totals {
-			font-weight: bold;
-		}
-		.subtotal {
-			border-top: 2px solid #333;
-		}
-		.bundle-info {
-			margin-top: 20px;
-		}
-		.bundles-container {
-			display: flex;
-			gap: 15px;
-			margin-bottom: 30px;
-			flex-wrap: wrap;
-		}
-		.bundle-box {
-			border: 2px solid #ddd;
-			border-radius: 8px;
-			padding: 15px;
-			width: 211px;
-			cursor: pointer;
-			transition: all 0.3s ease;
-			background-color: #f9f9f9;
-			display: flex;
-			flex-direction: column;
-			height: 144px;
-		}
-		.bundle-box:hover {
-			border-color: #0077cc;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-		}
-		.bundle-box.active {
-			border-color: #0077cc;
-			background-color: #f0f7ff;
-		}
-		.bundle-box h3 {
-			margin-top: 0;
-			margin-bottom: 10px;
-			color: #333;
-			font-size: 1rem;
-		}
-		.bundle-box ul {
-			margin: 0;
-			padding-left: 20px;
-			color: #555;
-			flex-grow: 1;
-			font-size: 0.9em;
-		}
-		.bundle-footer {
-			margin-top: 10px;
-			display: flex;
-			flex-direction: column;
-			align-items: flex-start;
-		}
-		.bundle-footer p {
-			margin: 0;
-			font-weight: bold;
-			color: #0077cc;
-		}
-		@media (max-width: 768px) {
-			.bundles-container {
-				justify-content: center;
-			}
-			.result-table {
-				width: 100%;
-			}
-		}
-	</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lokale Tester voor Prijspakketten</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      color: #444;
+    }
+
+    .pricing-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .pricing-block {
+      cursor: pointer;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .pricing-block.selected {
+      border-color: #4a90e2;
+      background-color: rgba(74, 144, 226, 0.05);
+      box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
+    }
+
+    .pricing-block .price {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
+      margin: 10px 0;
+    }
+
+    .pricing-block .title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .pricing-block .features {
+      margin-top: 15px;
+    }
+
+    .upgrade-form {
+      margin-top: 30px;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+    }
+
+    .form-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .form-option input[type="radio"],
+    .form-option input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    .price-summary {
+      background-color: #f5f7fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .price-summary .line-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .price-summary .subtotal {
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .price-summary .total {
+      font-weight: bold;
+      font-size: 1.2rem;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .price-summary .bundle-discount {
+      color: #e94e77;
+    }
+
+    .item-number {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .tools-section {
+      margin-top: 40px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+
+    .url-generator {
+      background-color: #f5f7fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .btn {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 10px 0;
+    }
+
+    .btn:hover {
+      background-color: #3a80d2;
+    }
+
+    .url-display {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .url-display.active {
+      display: block;
+    }
+
+    .url-display:not(.active) {
+      display: none;
+    }
+  </style>
 </head>
-
 <body>
-	<h1 id="mainTitle">Upgrade</h1>
-	<p id="mainSubtitle">Kies een reeds afgenomen pakket of stel zelf samen</p>
+  <div class="container">
+    <h1>Test & URL Generator</h1>
+    
+    <div class="pricing-container">
+      <div class="pricing-block" data-package="basic">
+        <div class="title">Basis Pakket</div>
+        <div class="price">€29,95</div>
+        <div class="features">
+          <div>Basisfunctionaliteit</div>
+          <div>Klantenservice</div>
+        </div>
+      </div>
+      
+      <div class="pricing-block" data-package="standard">
+        <div class="title">Standaard Pakket</div>
+        <div class="price">€49,95</div>
+        <div class="features">
+          <div>Basisfunctionaliteit</div>
+          <div>Financiële toegang</div>
+          <div>Extra features</div>
+        </div>
+      </div>
+      
+      <div class="pricing-block" data-package="premium">
+        <div class="title">Premium Pakket</div>
+        <div class="price">€69,95</div>
+        <div class="features">
+          <div>Alles uit Standaard</div>
+          <div>AdminInbox</div>
+          <div>Alle extra features</div>
+        </div>
+      </div>
+      
+      <div class="pricing-block" data-package="custom">
+        <div class="title">Zelf Samenstellen</div>
+        <div class="price">Vanaf €29,95</div>
+        <div class="features">
+          <div>Kies uw eigen features</div>
+          <div>Alleen betalen wat u nodig heeft</div>
+        </div>
+      </div>
+    </div>
+    
+    <form id="upgrade-form" class="upgrade-form hidden">
+      <h2>Pas uw pakket aan</h2>
+      
+      <div class="form-section">
+        <h3>Financiële toegang</h3>
+        <div class="form-option">
+          <input type="radio" id="financial-yes" name="financial" value="yes">
+          <label for="financial-yes">Ja, ik wil toegang tot Financieel</label>
+        </div>
+        <div class="form-option">
+          <input type="radio" id="financial-no" name="financial" value="no" checked>
+          <label for="financial-no">Nee, graag geen toegang tot Financieel</label>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>AdminInbox</h3>
+        <div class="form-option">
+          <input type="radio" id="adminInbox-yes" name="adminInbox" value="yes">
+          <label for="adminInbox-yes">Ja, ik wil AdminInbox</label>
+        </div>
+        <div class="form-option">
+          <input type="radio" id="adminInbox-no" name="adminInbox" value="no" checked>
+          <label for="adminInbox-no">Nee, geen AdminInbox</label>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Extra Features</h3>
+        <div class="form-option">
+          <input type="checkbox" id="feature1" name="customFeatures" value="feature1">
+          <label for="feature1">Feature 1</label>
+        </div>
+        <div class="form-option">
+          <input type="checkbox" id="feature2" name="customFeatures" value="feature2">
+          <label for="feature2">Feature 2</label>
+        </div>
+        <div class="form-option">
+          <input type="checkbox" id="feature3" name="customFeatures" value="feature3">
+          <label for="feature3">Feature 3</label>
+        </div>
+        <div class="form-option">
+          <input type="checkbox" id="feature4" name="customFeatures" value="feature4">
+          <label for="feature4">Feature 4</label>
+        </div>
+      </div>
+    </form>
+    
+    <div id="price-summary" class="price-summary"></div>
+    
+    <div class="tools-section">
+      <div class="url-generator">
+        <h2>URL Generator</h2>
+        <p>Genereer een URL naar de GitHub pagina met de huidige selecties:</p>
+        <button id="generate-url-button" class="btn">Genereer URL</button>
+        <div id="generated-url" class="url-display"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const GITHUB_BASE_URL = "https://yourusername.github.io/your-repo/38e0aerfgud3gas3efgf.html";
 
-	<div class="bundles-container">
-		<div class="bundle-box" id="bundle1">
-			<h3>Pakket</h3>
-			<ul id="bundle1Items">
-				<li>Laden...</li>
-			</ul>
-			<div class="bundle-footer">
-				<p id="bundle1Price">€ 0,00</p>
-			</div>
-		</div>
+    const PACKAGES = {
+      basic: {
+        name: "Basis Pakket",
+        price: 29.95,
+        features: {
+          financial: false,
+          adminInbox: false,
+          customFeatures: []
+        },
+        itemNumber: "PKG-001"
+      },
+      standard: {
+        name: "Standaard Pakket",
+        price: 49.95,
+        features: {
+          financial: true,
+          adminInbox: false,
+          customFeatures: ["feature1", "feature2"]
+        },
+        bundleDiscount: 5.95,
+        itemNumber: "PKG-002"
+      },
+      premium: {
+        name: "Premium Pakket",
+        price: 69.95,
+        features: {
+          financial: true,
+          adminInbox: true,
+          customFeatures: ["feature1", "feature2", "feature3", "feature4"]
+        },
+        bundleDiscount: 10.95,
+        itemNumber: "PKG-003"
+      }
+    };
 
-		<div class="bundle-box" id="bundle2">
-			<h3>Pakket</h3>
-			<ul id="bundle2Items">
-				<li>Laden...</li>
-			</ul>
-			<div class="bundle-footer">
-				<p id="bundle2Price">€ 0,00</p>
-			</div>
-		</div>
+    const PRODUCT_PRICES = {
+      financial: 19.95,
+      adminInbox: 14.95,
+      feature1: 9.95,
+      feature2: 9.95,
+      feature3: 12.95,
+      feature4: 12.95
+    };
 
-		<div class="bundle-box" id="bundle3">
-			<h3>Pakket</h3>
-			<ul id="bundle3Items">
-				<li>Laden...</li>
-			</ul>
-			<div class="bundle-footer">
-				<p id="bundle3Price">€ 0,00</p>
-			</div>
-		</div>
+    let pricingBlocks;
+    let customizeForm;
+    let priceSummary;
+    let selectedPackage = null;
+    let urlDisplay;
+    let generateUrlButton;
 
-		<div class="bundle-box" id="customBundle">
-			<h3>Zelf samenstellen</h3>
-			<ul id="customBundleItems">
-				<li>Kies je eigen combinatie</li>
-			</ul>
-			<div class="bundle-footer">
-				<p>&nbsp;</p>
-			</div>
-		</div>
-	</div>
+    document.addEventListener('DOMContentLoaded', () => {
+      pricingBlocks = document.querySelectorAll('.pricing-block');
+      customizeForm = document.getElementById('upgrade-form');
+      priceSummary = document.getElementById('price-summary');
+      urlDisplay = document.getElementById('generated-url');
+      generateUrlButton = document.getElementById('generate-url-button');
+      
+      initializePricingBlocks();
+      initializeForm();
+      
+      generateUrlButton.addEventListener('click', generateUrlForGitHub);
+    });
 
-	<div id="ism3Form" style="display: none;">
-		<h2 class="form-section-header" style="margin-top: 10px; margin-bottom: 20px;">Upgradeformulier</h2>
-		<div class="form-section">
-			<h2>Klanttoegang tot Boekhouding</h2>
-			<div class="option-group">
-				<label>
-					<input type="radio" name="boekhouding" value="geen"> Nee, graag geen enkele toegang tot Financieel
-				</label>
-				<label>
-					<input type="radio" name="boekhouding" value="financieel"> Financieel
-				</label>
-				<label>
-					<input type="radio" name="boekhouding" value="financieel-meekijken"> Financieel alleen Meekijken
-				</label>
-			</div>
-		</div>
+    function initializePricingBlocks() {
+      pricingBlocks.forEach(block => {
+        block.addEventListener('click', () => {
+          pricingBlocks.forEach(b => b.classList.remove('selected'));
+          block.classList.add('selected');
+          
+          const packageType = block.dataset.package;
+          selectedPackage = PACKAGES[packageType];
+          
+          updateFormFromPackage(packageType);
+          customizeForm.classList.remove('hidden');
+          updatePriceSummary();
+        });
+      });
+    }
 
-		<div class="form-section">
-			<h2>Verkoopfacturen</h2>
-			<div class="option-group">
-				<label>
-					<input type="checkbox" name="facturatie"> Facturatie
-				</label>
-			</div>
-		</div>
+    function updateFormFromPackage(packageType) {
+      const package = PACKAGES[packageType];
+      
+      const financialOption = document.querySelector('input[name="financial"][value="' + (package.features.financial ? "yes" : "no") + '"]');
+      if (financialOption) {
+        financialOption.checked = true;
+      }
+      
+      const adminInboxOption = document.querySelector('input[name="adminInbox"][value="' + (package.features.adminInbox ? "yes" : "no") + '"]');
+      if (adminInboxOption) {
+        adminInboxOption.checked = true;
+      }
+      
+      document.querySelectorAll('input[name="customFeatures"]').forEach(checkbox => {
+        checkbox.checked = package.features.customFeatures.includes(checkbox.value);
+      });
+    }
 
-		<div class="form-section">
-			<h2>Documenten</h2>
-			<div class="option-group">
-				<label>
-					<input type="radio" name="documenten" value="nvt"> Geen AdmInbox
-				</label>
-				<label>
-					<input type="radio" name="documenten" value="adminbox-scanuser"> AdmInbox (Alleen Aanleveren)
-				</label>
-				<label>
-					<input type="radio" name="documenten" value="adminbox"> AdmInbox (Aanleveren & Registreren)
-				</label>
-			</div>
-		</div>
+    function initializeForm() {
+      customizeForm.addEventListener('change', () => {
+        checkIfMatchesPackage();
+        updatePriceSummary();
+      });
+    }
 
-		<div class="form-section">
-			<h2>Facturen en bonnetjes herkennen</h2>
-			<div class="option-group">
-				<label>
-					<input type="checkbox" name="ocr"> OCR
-				</label>
-			</div>
-		</div>
-	</div>
+    function checkIfMatchesPackage() {
+      const currentSelection = {
+        financial: document.querySelector('input[name="financial"]:checked').value === "yes",
+        adminInbox: document.querySelector('input[name="adminInbox"]:checked').value === "yes",
+        customFeatures: Array.from(
+          document.querySelectorAll('input[name="customFeatures"]:checked')
+        ).map(checkbox => checkbox.value)
+      };
+      
+      let matchedPackage = null;
+      
+      for (const [key, pkg] of Object.entries(PACKAGES)) {
+        if (
+          pkg.features.financial === currentSelection.financial &&
+          pkg.features.adminInbox === currentSelection.adminInbox &&
+          arraysEqual(pkg.features.customFeatures, currentSelection.customFeatures)
+        ) {
+          matchedPackage = key;
+          break;
+        }
+      }
+      
+      if (matchedPackage) {
+        selectedPackage = PACKAGES[matchedPackage];
+        
+        pricingBlocks.forEach(block => {
+          if (block.dataset.package === matchedPackage) {
+            block.classList.add('selected');
+          } else {
+            block.classList.remove('selected');
+          }
+        });
+      } else {
+        selectedPackage = null;
+        pricingBlocks.forEach(block => block.classList.remove('selected'));
+      }
+    }
 
-	<div id="resultSection" class="result-section">
-		<h2 class="form-section-header">Kostenoverzicht</h2>
-		<table id="resultTable" class="result-table">
-			<thead>
-				<tr>
-					<th>Omschrijving</th>
-					<th style="text-align: right;">Bedrag</th>
-				</tr>
-			</thead>
-			<tbody id="resultTableBody">
-			</tbody>
-		</table>
-		<div id="bundleInfo" class="bundle-info"></div>
-	</div>
+    function updatePriceSummary() {
+      const financial = document.querySelector('input[name="financial"]:checked').value === "yes";
+      const adminInbox = document.querySelector('input[name="adminInbox"]:checked').value === "yes";
+      const customFeatures = Array.from(
+        document.querySelectorAll('input[name="customFeatures"]:checked')
+      ).map(checkbox => checkbox.value);
+      
+      priceSummary.innerHTML = '';
+      
+      let items = [];
+      let subtotal = 0;
+      
+      if (financial) {
+        items.push({
+          name: "Financiële toegang",
+          price: PRODUCT_PRICES.financial
+        });
+        subtotal += PRODUCT_PRICES.financial;
+      }
+      
+      if (adminInbox) {
+        items.push({
+          name: "AdminInbox",
+          price: PRODUCT_PRICES.adminInbox
+        });
+        subtotal += PRODUCT_PRICES.adminInbox;
+      }
+      
+      customFeatures.forEach(feature => {
+        items.push({
+          name: getFeatureDisplayName(feature),
+          price: PRODUCT_PRICES[feature]
+        });
+        subtotal += PRODUCT_PRICES[feature];
+      });
+      
+      if (items.length === 1) {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'line-item';
+        itemElement.innerHTML = `
+          <span>${items[0].name}</span>
+          <span>€${items[0].price.toFixed(2)}</span>
+        `;
+        priceSummary.appendChild(itemElement);
+        
+        if (selectedPackage) {
+          const itemNumberElement = document.createElement('div');
+          itemNumberElement.className = 'item-number';
+          itemNumberElement.innerHTML = `Artikelnummer: ${selectedPackage.itemNumber}`;
+          priceSummary.appendChild(itemNumberElement);
+        }
+        
+        const totalElement = document.createElement('div');
+        totalElement.className = 'total';
+        totalElement.innerHTML = `
+          <span>Totaal per maand</span>
+          <span>€${items[0].price.toFixed(2)}</span>
+        `;
+        priceSummary.appendChild(totalElement);
+        
+        return;
+      }
+      
+      items.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'line-item';
+        itemElement.innerHTML = `
+          <span>${item.name}</span>
+          <span>€${item.price.toFixed(2)}</span>
+        `;
+        priceSummary.appendChild(itemElement);
+      });
+      
+      const subtotalElement = document.createElement('div');
+      subtotalElement.className = 'line-item subtotal';
+      subtotalElement.innerHTML = `
+        <span>Subtotaal</span>
+        <span>€${subtotal.toFixed(2)}</span>
+      `;
+      priceSummary.appendChild(subtotalElement);
+      
+      if (selectedPackage) {
+        const itemNumberElement = document.createElement('div');
+        itemNumberElement.className = 'item-number';
+        itemNumberElement.innerHTML = `Artikelnummer: ${selectedPackage.itemNumber}`;
+        priceSummary.appendChild(itemNumberElement);
+      }
+      
+      let total = subtotal;
+      if (selectedPackage && selectedPackage.bundleDiscount) {
+        const discountElement = document.createElement('div');
+        discountElement.className = 'line-item bundle-discount';
+        discountElement.innerHTML = `
+          <span>Pakketkorting</span>
+          <span>-€${selectedPackage.bundleDiscount.toFixed(2)}</span>
+        `;
+        priceSummary.appendChild(discountElement);
+        
+        total = subtotal - selectedPackage.bundleDiscount;
+      }
+      
+      const totalElement = document.createElement('div');
+      totalElement.className = 'total';
+      totalElement.innerHTML = `
+        <span>Totaal per maand</span>
+        <span>€${total.toFixed(2)}</span>
+      `;
+      priceSummary.appendChild(totalElement);
+    }
 
-	<script>
-		// Globale variabelen
-		let prices = [];              // Prijzen van componenten
-		let bundles = [];             // Bundel data
-		let componentNames = [];      // Namen van componenten
-		let componentMap = {};        // Mapping van indices naar letters
-		let uiBundles = [];           // Bundels voor UI display
+    function generateUrlForGitHub() {
+      const financial = document.querySelector('input[name="financial"]:checked').value;
+      const adminInbox = document.querySelector('input[name="adminInbox"]:checked').value;
+      
+      const customFeatures = Array.from(
+        document.querySelectorAll('input[name="customFeatures"]:checked')
+      ).map(checkbox => checkbox.value);
+      
+      let packageId = null;
+      if (selectedPackage) {
+        for (const [key, pkg] of Object.entries(PACKAGES)) {
+          if (pkg === selectedPackage) {
+            packageId = key;
+            break;
+          }
+        }
+      }
+      
+      const params = new URLSearchParams();
+      params.append('financial', financial);
+      params.append('adminInbox', adminInbox);
+      
+      if (customFeatures.length > 0) {
+        params.append('customFeatures', customFeatures.join(','));
+      }
+      
+      if (packageId) {
+        params.append('package', packageId);
+      }
+      
+      const generatedUrl = `${GITHUB_BASE_URL}?${params.toString()}`;
+      
+      urlDisplay.innerHTML = `<a href="${generatedUrl}" target="_blank">${generatedUrl}</a>`;
+      urlDisplay.classList.add('active');
+    }
 
-		// Functie om URL parameters te verwerken
-		function processURLParameters() {
-			const urlParams = new URLSearchParams(window.location.search);
-			
-			// Basis parameters
-			const title = urlParams.get('title');
-			if (title) {
-				document.getElementById('mainTitle').textContent = title;
-				document.title = title;
-			}
-			
-			const subtitle = urlParams.get('subtitle');
-			if (subtitle) {
-				document.getElementById('mainSubtitle').textContent = subtitle;
-			}
-			
-			// Componenten en prijzen
-			if (urlParams.has('ps')) {
-				try {
-					prices = JSON.parse(decodeURIComponent(urlParams.get('ps')));
-				} catch (e) {
-					console.error('Error parsing prices:', e);
-				}
-			}
-			
-			if (urlParams.has('cn')) {
-				try {
-					componentNames = JSON.parse(decodeURIComponent(urlParams.get('cn')));
-				} catch (e) {
-					console.error('Error parsing component names:', e);
-				}
-			}
-			
-			// Bundeldata
-			if (urlParams.has('bs')) {
-				try {
-					const bundlesData = JSON.parse(decodeURIComponent(urlParams.get('bs')));
-					bundles = bundlesData.map(b => ({
-						components: b.c.map(index => indexToLetter(index)),
-						code: b.n,
-						discount: b.d,
-						originalCode: urlParams.has('codecustom') ? urlParams.get('codecustom') + ' ' + b.n : 'ISM3 ' + b.n
-					}));
-				} catch (e) {
-					console.error('Error parsing bundles:', e);
-				}
-			}
-			
-			// UI bundels
-			if (urlParams.has('ui')) {
-				try {
-					uiBundles = JSON.parse(decodeURIComponent(urlParams.get('ui')));
-				} catch (e) {
-					console.error('Error parsing UI bundles:', e);
-				}
-			}
-			
-			// Component mapping
-			setupComponentMap();
-			
-			// UI opzetten
-			setupUI();
-			
-			// Initialiseren
-			initializeApp();
-		}
-		
-		// Componenten mapping opzetten
-		function setupComponentMap() {
-			componentMap = {
-				0: 'a', // Financieel
-				1: 'b', // AdmInbox
-				2: 'c', // AdmInbox Scanuser
-				3: 'd', // Facturatie
-				4: 'e', // Financieel Meekijken
-				5: 'f'  // Onbeperkt OCR
-			};
-		}
-		
-		// Letter naar index functie
-		function letterToIndex(letter) {
-			for (const [index, value] of Object.entries(componentMap)) {
-				if (value === letter) {
-					return parseInt(index);
-				}
-			}
-			return -1;
-		}
-		
-		// Index naar letter functie
-		function indexToLetter(index) {
-			return componentMap[index];
-		}
-		
-		// UI instellen met bundels
-		function setupUI() {
-			if (uiBundles.length >= 4) {
-				setupBundleUI('bundle1', uiBundles[0]);
-				setupBundleUI('bundle2', uiBundles[1]);
-				setupBundleUI('bundle3', uiBundles[2]);
-				setupBundleUI('customBundle', uiBundles[3]);
-			}
-		}
-		
-		// Setup individuele bundel UI
-		function setupBundleUI(bundleId, data) {
-			if (!data) return;
-			
-			const itemsElement = document.getElementById(bundleId + 'Items');
-			const priceElement = document.getElementById(bundleId + 'Price');
-			
-			// Bewaar bundel code voor later
-			if (bundleId !== 'customBundle' && data.c) {
-				document.getElementById(bundleId).dataset.bundleCode = data.c;
-			}
-			
-			if (itemsElement && data.i && data.i.length > 0) {
-				itemsElement.innerHTML = '';
-				
-				const items = data.i;
-				
-				items.forEach(item => {
-					const li = document.createElement('li');
-					if (typeof item === 'string' && item.includes('(')) {
-						// Line break na opening haakje
-						li.innerHTML = item.replace(/\(/g, '(<br>');
-					} else {
-						li.textContent = item;
-					}
-					itemsElement.appendChild(li);
-				});
-			}
-			
-			if (priceElement && data.p) {
-				priceElement.textContent = data.p;
-			}
-		}
-		
-		// Bundel opzoeken op basis van code
-		function findBundleByCode(code) {
-			return bundles.find(b => b.code === code);
-		}
-		
-		// Formulier invullen op basis van geselecteerde componenten
-		function fillForm(components) {
-			// Reset formulier
-			document.querySelector('input[name="boekhouding"][value="geen"]').checked = true;
-			document.querySelector('input[name="facturatie"]').checked = false;
-			document.querySelector('input[name="documenten"][value="nvt"]').checked = true;
-			document.querySelector('input[name="ocr"]').checked = false;
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      const sortedA = [...a].sort();
+      const sortedB = [...b].sort();
+      for (let i = 0; i < sortedA.length; i++) {
+        if (sortedA[i] !== sortedB[i]) return false;
+      }
+      return true;
+    }
 
-			// Zet juiste waarden
-			if (components.includes('a')) {
-				document.querySelector('input[name="boekhouding"][value="financieel"]').checked = true;
-			} else if (components.includes('e')) {
-				document.querySelector('input[name="boekhouding"][value="financieel-meekijken"]').checked = true;
-			}
-
-			if (components.includes('d')) {
-				document.querySelector('input[name="facturatie"]').checked = true;
-			}
-
-			if (components.includes('b')) {
-				document.querySelector('input[name="documenten"][value="adminbox"]').checked = true;
-			} else if (components.includes('c')) {
-				document.querySelector('input[name="documenten"][value="adminbox-scanuser"]').checked = true;
-			}
-
-			if (components.includes('f')) {
-				document.querySelector('input[name="ocr"]').checked = true;
-			}
-		}
-		
-		// Actieve bundel markeren
-		function highlightActiveBundle(bundleId) {
-			document.querySelectorAll('.bundle-box').forEach(box => {
-				box.classList.remove('active');
-			});
-			document.getElementById(bundleId).classList.add('active');
-		}
-		
-		// Geselecteerde componenten ophalen uit formulier
-		function getSelectedComponents() {
-			const boekhoudingChecked = document.querySelector('input[name="boekhouding"]:checked');
-			const documentenChecked = document.querySelector('input[name="documenten"]:checked');
-
-			const boekhouding = boekhoudingChecked ? boekhoudingChecked.value : '';
-			const facturatie = document.querySelector('input[name="facturatie"]').checked;
-			const documenten = documentenChecked ? documentenChecked.value : '';
-			const ocrChecked = document.querySelector('input[name="ocr"]').checked;
-
-			const selectedComponents = [];
-
-			// Boekhouding
-			if (boekhouding === 'financieel') {
-				selectedComponents.push('a');  // Financieel
-			} else if (boekhouding === 'financieel-meekijken') {
-				selectedComponents.push('e');  // Financieel Meekijken
-			}
-
-			// Facturatie
-			if (facturatie) {
-				selectedComponents.push('d');  // Facturatie
-			}
-
-			// Documenten
-			if (documenten === 'adminbox') {
-				selectedComponents.push('b');  // AdminBox
-			} else if (documenten === 'adminbox-scanuser') {
-				selectedComponents.push('c');  // AdminBox Scanuser
-			}
-
-			return {
-				selectedComponents,
-				ocrChecked
-			};
-		}
-		
-		// Bundel highlighten op basis van geselecteerde componenten
-		function updateBundleHighlighting(components) {
-			// Alleen updaten als custom niet actief is
-			if (!document.getElementById('customBundle').classList.contains('active')) {
-				const sortedComponents = [...components].sort();
-				const selectedStr = JSON.stringify(sortedComponents);
-
-				// Zoek in alle 3 bundels
-				let found = false;
-				
-				for (let i = 1; i <= 3; i++) {
-					const bundleElement = document.getElementById(`bundle${i}`);
-					const bundleCode = bundleElement.dataset.bundleCode;
-					
-					if (bundleCode) {
-						const bundle = findBundleByCode(bundleCode);
-						if (bundle) {
-							const sortedBundleComponents = [...bundle.components].sort();
-							if (JSON.stringify(sortedBundleComponents) === selectedStr) {
-								highlightActiveBundle(`bundle${i}`);
-								found = true;
-								break;
-							}
-						}
-					}
-				}
-				
-				// Als geen match gevonden, markeer als custom
-				if (!found) {
-					highlightActiveBundle('customBundle');
-				}
-			}
-		}
-		
-		// Prijzen berekenen
-		function calculatePrices() {
-			const { selectedComponents, ocrChecked } = getSelectedComponents();
-			
-			// Sorteer voor consistente vergelijking
-			const sortedComponents = [...selectedComponents].sort();
-
-			// Zoek bijpassende bundel
-			let bundleMatch = null;
-			for (const bundle of bundles) {
-				const sortedBundleComponents = [...bundle.components].sort();
-				if (JSON.stringify(sortedComponents) === JSON.stringify(sortedBundleComponents)) {
-					bundleMatch = bundle;
-					break;
-				}
-			}
-
-			// Bereken componenten som
-			let subtotal = 0;
-			const componentPrices = [];
-			
-			for (const component of selectedComponents) {
-				const componentIndex = letterToIndex(component);
-				if (componentIndex !== -1) {
-					const price = prices[componentIndex];
-					subtotal += price;
-					componentPrices.push({
-						name: componentNames[componentIndex],
-						price: price
-					});
-				}
-			}
-
-			// Bundel korting
-			const discount = bundleMatch ? bundleMatch.discount : 0;
-			const bundleTotal = subtotal - discount;
-
-			// OCR prijs
-			const ocrCost = ocrChecked ? prices[5] : 0; // OCR is index 5
-			const totalPrice = bundleTotal + ocrCost;
-
-			// Toon resultaten
-			displayResults(
-				componentPrices,
-				subtotal,
-				discount,
-				bundleTotal,
-				ocrChecked,
-				ocrCost,
-				totalPrice,
-				bundleMatch
-			);
-
-			// Update bundel highlighting
-			updateBundleHighlighting(selectedComponents);
-			
-			// Stuur data naar parent indien in iframe
-			sendDataToParent(selectedComponents, totalPrice, bundleMatch);
-		}
-		
-		// Stuur data naar parent frame
-		function sendDataToParent(components, total, bundle) {
-			if (window.parent && window.parent !== window) {
-				const selectedData = {
-					components: components,
-					total: total,
-					bundleCode: bundle ? bundle.code : null
-				};
-				
-				try {
-					window.parent.postMessage({
-						type: 'selection',
-						data: selectedData
-					}, '*');
-				} catch (e) {
-					console.error('Fout bij verzenden data naar parent:', e);
-				}
-			}
-		}
-
-		// Toon resultaten in kostenoverzicht
-		function displayResults(componentPrices, subtotal, discount, bundleTotal, ocrChecked, ocrCost, totalPrice, bundle) {
-			const resultSection = document.getElementById('resultSection');
-			const resultTableBody = document.getElementById('resultTableBody');
-			const bundleInfo = document.getElementById('bundleInfo');
-
-			resultTableBody.innerHTML = '';
-			bundleInfo.innerHTML = '';
-
-			if ((componentPrices.length > 0 || ocrChecked) && totalPrice > 0) {
-				resultSection.style.display = 'block';
-
-				// Individuele componenten tonen
-				componentPrices.forEach(component => {
-					const row = document.createElement('tr');
-					
-					const nameCell = document.createElement('td');
-					nameCell.textContent = component.name;
-					
-					const priceCell = document.createElement('td');
-					priceCell.textContent = '€ ' + component.price.toFixed(2).replace('.', ',');
-					priceCell.style.textAlign = 'right';
-					
-					row.appendChild(nameCell);
-					row.appendChild(priceCell);
-					
-					resultTableBody.appendChild(row);
-				});
-				
-				// Subtotaal regel
-				if (componentPrices.length > 1) {
-					const subtotalRow = document.createElement('tr');
-					subtotalRow.className = 'subtotal';
-					
-					const subtotalNameCell = document.createElement('td');
-					subtotalNameCell.textContent = 'Subtotaal';
-					
-					const subtotalPriceCell = document.createElement('td');
-					subtotalPriceCell.textContent = '€ ' + subtotal.toFixed(2).replace('.', ',');
-					subtotalPriceCell.style.textAlign = 'right';
-					
-					subtotalRow.appendChild(subtotalNameCell);
-					subtotalRow.appendChild(subtotalPriceCell);
-					
-					resultTableBody.appendChild(subtotalRow);
-				}
-				
-				// Bundelkorting tonen indien van toepassing
-				if (discount > 0) {
-					const discountRow = document.createElement('tr');
-					
-					const discountNameCell = document.createElement('td');
-					discountNameCell.textContent = 'Bundelkorting';
-					
-					const discountPriceCell = document.createElement('td');
-					discountPriceCell.textContent = '€ -' + discount.toFixed(2).replace('.', ',');
-					discountPriceCell.style.textAlign = 'right';
-					
-					discountRow.appendChild(discountNameCell);
-					discountRow.appendChild(discountPriceCell);
-					
-					resultTableBody.appendChild(discountRow);
-				}
-				
-				// OCR toevoegen indien geselecteerd
-				if (ocrChecked) {
-					const ocrRow = document.createElement('tr');
-					
-					const ocrNameCell = document.createElement('td');
-					ocrNameCell.textContent = componentNames[5]; // OCR naam
-					
-					const ocrPriceCell = document.createElement('td');
-					ocrPriceCell.textContent = '€ ' + ocrCost.toFixed(2).replace('.', ',');
-					ocrPriceCell.style.textAlign = 'right';
-					
-					ocrRow.appendChild(ocrNameCell);
-					ocrRow.appendChild(ocrPriceCell);
-					
-					resultTableBody.appendChild(ocrRow);
-				}
-				
-				// Totaal tonen
-				const totalRow = document.createElement('tr');
-				totalRow.className = 'totals';
-				
-				const totalNameCell = document.createElement('td');
-				totalNameCell.textContent = 'Totaal';
-				
-				const totalPriceCell = document.createElement('td');
-				totalPriceCell.textContent = '€ ' + totalPrice.toFixed(2).replace('.', ',');
-				totalPriceCell.style.textAlign = 'right';
-				
-				totalRow.appendChild(totalNameCell);
-				totalRow.appendChild(totalPriceCell);
-				
-				resultTableBody.appendChild(totalRow);
-
-				// Bundel code tonen indien van toepassing
-				if (bundle) {
-					bundleInfo.innerHTML = `<br>Bundle artikelnummer: ${bundle.originalCode || ('ISM3 ' + bundle.code)}`;
-				}
-			} else {
-				resultSection.style.display = 'none';
-			}
-		}
-		
-		// App initialiseren
-		function initializeApp() {
-			// Toon formulier
-			document.getElementById('ism3Form').style.display = 'block';
-			
-			// Bundle 1 onclick
-			document.getElementById('bundle1').addEventListener('click', function() {
-				highlightActiveBundle('bundle1');
-				
-				const bundleCode = this.dataset.bundleCode;
-				const bundle = findBundleByCode(bundleCode);
-				
-				if (bundle) {
-					fillForm(bundle.components);
-					calculatePrices();
-				}
-			});
-			
-			// Bundle 2 onclick
-			document.getElementById('bundle2').addEventListener('click', function() {
-				highlightActiveBundle('bundle2');
-				
-				const bundleCode = this.dataset.bundleCode;
-				const bundle = findBundleByCode(bundleCode);
-				
-				if (bundle) {
-					fillForm(bundle.components);
-					calculatePrices();
-				}
-			});
-			
-			// Bundle 3 onclick
-			document.getElementById('bundle3').addEventListener('click', function() {
-				highlightActiveBundle('bundle3');
-				
-				const bundleCode = this.dataset.bundleCode;
-				const bundle = findBundleByCode(bundleCode);
-				
-				if (bundle) {
-					fillForm(bundle.components);
-					calculatePrices();
-				}
-			});
-			
-			// Custom bundle onclick
-			document.getElementById('customBundle').addEventListener('click', function() {
-				highlightActiveBundle('customBundle');
-				
-				// Reset formulier
-				document.querySelectorAll('input[name="boekhouding"]').forEach(radio => radio.checked = false);
-				document.querySelectorAll('input[name="documenten"]').forEach(radio => radio.checked = false);
-				document.querySelector('input[name="facturatie"]').checked = false;
-				document.querySelector('input[name="ocr"]').checked = false;
-				
-				calculatePrices();
-			});
-			
-			// Update prijzen bij form wijzigingen
-			document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
-				input.addEventListener('change', function() {
-					const activePackageSelected = document.querySelector('.bundle-box.active:not(#customBundle)');
-					if (activePackageSelected) {
-						highlightActiveBundle('customBundle');
-					}
-					calculatePrices();
-				});
-			});
-			
-			// Loaded event sturen indien in iframe
-			if (window.parent && window.parent !== window) {
-				window.parent.postMessage({
-					type: 'loaded'
-				}, '*');
-			}
-		}
-		
-		// Start verwerking bij laden pagina
-		document.addEventListener('DOMContentLoaded', function() {
-			processURLParameters();
-		});
-	</script>
+    function getFeatureDisplayName(featureKey) {
+      const displayNames = {
+        feature1: "Feature 1",
+        feature2: "Feature 2",
+        feature3: "Feature 3",
+        feature4: "Feature 4"
+      };
+      return displayNames[featureKey] || featureKey;
+    }
+  </script>
 </body>
 </html>
